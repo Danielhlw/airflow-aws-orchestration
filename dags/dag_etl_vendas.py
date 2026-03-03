@@ -1,6 +1,7 @@
 """
 DAG ETL de vendas: lê CSV do S3 (estudos-dan-sql/vendas/vendas.csv),
 limpa, gera dimensões e fato, grava no S3 em gold/.
+Agendado para rodar diariamente (@daily).
 """
 import csv
 import io
@@ -162,7 +163,7 @@ def _build_dims_and_fact(ti, **context):
 with DAG(
     dag_id="dag_etl_vendas",
     description="ETL: S3 vendas → limpeza → dimensões e fato em gold/",
-    schedule=None,
+    schedule="@daily",
     start_date=datetime(2025, 1, 1),
     catchup=False,
     tags=["etl", "vendas", "s3"],
