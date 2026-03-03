@@ -106,3 +106,26 @@ sudo chown 50000:0 dags/dag_hello.py
 5. Abra o DAG e clique na task **say_hello** para ver os logs; deve aparecer `Hello from Airflow`.
 
 Pronto: o Airflow está lendo DAGs e executando tasks com o LocalExecutor.
+
+---
+
+## 10. DAG ETL de vendas (S3 → gold)
+
+O DAG **dag_etl_vendas** lê `s3://estudos-dan-sql/vendas/vendas.csv`, limpa os dados, gera dimensões e fato e grava em `s3://estudos-dan-sql/gold/vendas/` e `processed/vendas/`.
+
+**Copiar o DAG para a pasta `dags/`** (na raiz do projeto):
+
+```bash
+sudo cp dag_etl_vendas.py dags/
+sudo chown 50000:0 dags/dag_etl_vendas.py
+```
+
+**Criar a connection AWS no Airflow** (para o S3Hook usar as credenciais):
+
+1. Na interface, vá em **Admin** → **Connections** → **+** (Add).
+2. **Connection Id:** `aws_default`
+3. **Connection Type:** `Amazon Web Services`
+4. Deixe **Login** e **Password** em branco (o container já recebe `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` do `.env`; o hook usa as variáveis de ambiente).
+5. **Extra:** `{}` ou em branco. Salve.
+
+**Rodar o DAG:** ative **dag_etl_vendas**, depois **Trigger DAG**. Ao final, confira no S3 os arquivos em `gold/vendas/` (dim_cliente.csv, dim_produto.csv, dim_data.csv, dim_estado.csv, fato_vendas.csv) e em `processed/vendas/` (vendas_cleaned.csv).

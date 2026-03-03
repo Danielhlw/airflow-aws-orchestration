@@ -18,11 +18,9 @@ Projeto de **estudos e testes** de orquestração com Apache Airflow, focado em 
 
 ### Arquitetura (simplificada, local)
 
-- **Docker Compose** com dois serviços:
-  - **PostgreSQL**: banco de metadados do Airflow.
-  - **Airflow**: um único serviço com webserver + scheduler, usando **LocalExecutor** (sem Redis, sem workers separados).
-- **Volumes** para `dags/`, `logs/` e, se necessário, `plugins/`.
-- Acesso ao S3 via credenciais AWS (perfil default ou variáveis de ambiente).
+- **Docker Compose** com três serviços: **PostgreSQL** (metadados), **airflow-scheduler** e **airflow-webserver**, usando **LocalExecutor** (sem Redis, sem workers separados).
+- **Volumes** para `dags/`, `logs/`; credenciais via `.env` (incl. AWS para S3).
+- Ver passo a passo em **[docs/setup.md](docs/setup.md)**.
 
 ### Fluxo de dados planejado
 
@@ -66,18 +64,20 @@ airflow-aws-orchestration/
 
 - Docker e Docker Compose.
 - Acesso AWS ao bucket `estudos-dan-sql` (perfil default em `~/.aws/credentials` ou variáveis de ambiente).
-- (A definir) Caminho exato e formato do arquivo de vendas no S3.
+- Arquivo de vendas: **`s3://estudos-dan-sql/vendas/vendas.csv`** (CSV com pedido_id, cliente, produto, categoria, data_pedido, valor, quantidade, estado).
 
 ---
 
-## Como rodar (após implementação)
+## Como rodar
 
-1. Copiar `.env.example` para `.env` e ajustar (ex.: `AIRFLOW_UID`, variáveis AWS se não usar perfil default).
-2. Na pasta `docker/`: `docker-compose up -d`.
-3. Aguardar inicialização; interface web em **http://localhost:8080** (usuário/senha conforme configurado no Compose).
-4. DAGs em `dags/` serão carregados automaticamente.
+Siga **[docs/setup.md](docs/setup.md)** (criar `.env`, permissões, `docker-compose up`, DAG hello e ETL). Em resumo:
 
-*(Comandos e variáveis exatas serão documentados quando o `docker-compose.yml` for implementado.)*
+1. `docker/.env` a partir de `docker/.env.example` (e variáveis AWS se necessário).
+2. `docker-compose up -d` na pasta `docker/`.
+3. Interface em **http://localhost:8080**; DAG **dag_etl_vendas** lê o CSV do S3, limpa e gera dimensões + fato em `s3://estudos-dan-sql/processed/` e `gold/vendas/`.
+
+**Conferir resultado no S3:** [docs/verificar-etl-s3.md](docs/verificar-etl-s3.md).  
+**Análise de uma execução:** [docs/analise-etl-2026-03-03.md](docs/analise-etl-2026-03-03.md).
 
 ---
 
@@ -87,11 +87,7 @@ airflow-aws-orchestration/
 
 ---
 
-## Próximos passos (roadmap)
+## Status e próximos passos
 
-1. Definir caminho e formato do arquivo de vendas no S3.
-2. Implementar `docker-compose.yml` (Postgres + Airflow, LocalExecutor) e `.env.example`.
-3. Implementar DAG de ETL de vendas (leitura S3 → transformação → destino).
-4. Modelar e criar fatos/dimensões (S3 e/ou PostgreSQL).
-5. Documentar no README e, se necessário, em `docs/` (modelo de dados, convenções).
-6. (Opcional) GitHub Actions para validar import e sintaxe dos DAGs.
+- **Feito:** Docker (Postgres + scheduler + webserver), DAG hello, DAG ETL vendas (S3 → processed + gold), documentação em `docs/`.
+- **Próximos (opcional):** GitHub Actions para validar DAGs; gravar fatos/dimensões também em PostgreSQL; agendar o ETL (ex.: `@daily`).
