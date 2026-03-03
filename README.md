@@ -2,6 +2,8 @@
 
 Projeto de **estudos e testes** de orquestração com Apache Airflow, focado em ETL a partir de dados no S3 (bucket `estudos-dan-sql`), com modelo de dados em estrela (fatos e dimensões). Ambiente **local**, sem uso de EC2.
 
+![Airflow AWS Orchestration](image/README/image.png)
+
 ---
 
 ## Objetivo
@@ -91,3 +93,5 @@ Siga **[docs/setup.md](docs/setup.md)** (criar `.env`, permissões, `docker-comp
 
 - **Feito:** Docker (Postgres + scheduler + webserver), DAG hello, DAG ETL vendas (S3 → processed + gold), documentação em `docs/`.
 - **Próximos (opcional):** GitHub Actions para validar DAGs; gravar fatos/dimensões também em PostgreSQL; agendar o ETL (ex.: `@daily`).
+
+
